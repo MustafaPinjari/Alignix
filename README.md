@@ -1,832 +1,646 @@
-# Alignix
+<div align="center">
 
-**Autonomous Document Formatting Intelligence Platform**
+<img src="https://img.shields.io/badge/Alignix-Autonomous%20Formatting-4f8ef7?style=for-the-badge&logo=microsoftword&logoColor=white" />
+
+# 🧠 Alignix
+
+### Autonomous Document Formatting Intelligence Platform
+
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![Electron](https://img.shields.io/badge/Electron-31-47848F?style=flat-square&logo=electron&logoColor=white)](https://electronjs.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+
+> *"The document maintains itself automatically."*
+
+</div>
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
-### 1. Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Microsoft Word (for PDF export and live COM automation)
+### Prerequisites
 
-### 2. Setup
+| Requirement | Version |
+|---|---|
+| 🐍 Python | 3.10+ |
+| 🟢 Node.js | 18+ |
+| 📝 Microsoft Word | Any (for PDF export & COM automation) |
+
 ```bat
+# 1 — Install everything
 setup.bat
-```
 
-### 3. Run (Development)
-```bat
+# 2 — Run in development
 run_dev.bat
 ```
 
 ---
 
-## Architecture
+## 🏗️ System Architecture
 
-```
-Alignix/
-├── backend/
-│   ├── main.py                  # Flask + SocketIO server
-│   ├── api/
-│   │   ├── routes.py            # REST endpoints
-│   │   └── socket_events.py     # Real-time WebSocket events
-│   ├── engines/
-│   │   ├── analyzer.py          # Document structure analysis
-│   │   ├── rule_engine.py       # Formatting rule application
-│   │   ├── correction.py        # Correction orchestrator + rollback
-│   │   ├── monitor.py           # Watchdog-based live monitoring
-│   │   └── export.py            # DOCX/PDF export
-│   ├── services/
-│   │   ├── profile_service.py   # Profile/template CRUD
-│   │   └── document_service.py  # Document session management
-│   ├── db/
-│   │   └── database.py          # SQLAlchemy models + SQLite
-│   └── templates/
-│       └── builtin.py           # 6 built-in formatting profiles
-│
-└── frontend/
-    ├── electron/
-    │   ├── main.js              # Electron main process
-    │   └── preload.js           # Secure IPC bridge
-    └── src/
-        ├── pages/
-        │   ├── dashboard/       # Upload, analyze, correct, export
-        │   ├── monitor/         # Live monitoring control + event log
-        │   ├── rules/           # Visual rule editor
-        │   ├── templates/       # Profile manager
-        │   ├── analytics/       # Health scores + charts
-        │   └── settings/        # App configuration
-        ├── components/          # Layout, Sidebar, TitleBar, UI
-        ├── store/appStore.js    # Zustand global state
-        ├── services/api.js      # Axios API client
-        └── hooks/useSocket.js   # Socket.IO real-time hook
-```
+```mermaid
+graph TB
+    subgraph Desktop["🖥️ Alignix Desktop App — Electron Shell"]
+        subgraph Frontend["🎨 Frontend Layer"]
+            UI["React 18 + Tailwind CSS + Zustand"]
+            Pages["Dashboard · Safe Review · Monitor · Rules · Templates · Batch · Insights · Settings"]
+        end
 
----
+        subgraph Backend["⚙️ Backend Layer"]
+            Flask["Flask 3 + Flask-SocketIO"]
+            REST["REST API — routes.py"]
+            WS["WebSocket Events — socket_events.py"]
+        end
 
-## Built-in Templates
+        subgraph Engines["🔧 Engine Layer"]
+            UE["🧠 Understanding Engine"]
+            RE["📐 Rule Engine"]
+            CE["✏️ Correction Engine"]
+            PM["📄 Page Map Engine"]
+            SB["🔒 Sandbox Engine"]
+            LS["📏 Layout Stabilizer"]
+            MON["👁️ Monitor Engine"]
+            COM["🔗 Word COM"]
+            BE["📦 Batch Engine"]
+            EX["📤 Export Engine"]
+        end
 
-| Template | Standard |
-|---|---|
-| IEEE Paper | IEEE conference formatting |
-| College Report | Academic report standard |
-| Business Proposal | Professional business docs |
-| Legal Document | Legal formatting standard |
-| Resume | CV/Resume formatting |
-| Dissertation | Academic thesis standard |
+        subgraph DB["💾 Persistence Layer"]
+            SQLite["SQLite — alignix.db"]
+            Tables["profiles · rules · document_sessions · correction_logs · integrity_locks"]
+        end
+    end
 
----
-
-## Core Workflow
-
-```
-Open DOCX → Analyze → Detect Issues → Select Profile → Auto-Correct → Export
-                                              ↓
-                                    Start Live Monitor
-                                              ↓
-                              Document saved → Violations detected
-                                              ↓
-                                    Auto-correct + notify
+    UI -->|"HTTP Axios + Socket.IO"| Flask
+    Flask --> REST
+    Flask --> WS
+    REST --> UE & RE & CE & PM & SB & BE & EX
+    CE --> LS
+    MON --> CE
+    COM --> CE
+    CE --> SQLite
+    SQLite --- Tables
 ```
 
 ---
 
-## API Reference
+## 📁 Folder Structure
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/document/analyze` | Analyze document structure |
-| POST | `/api/document/correct` | Apply formatting corrections |
-| POST | `/api/document/health` | Get health scores |
-| POST | `/api/document/export` | Export DOCX or PDF |
-| GET | `/api/profiles` | List all profiles |
-| POST | `/api/profiles` | Create profile |
-| GET | `/api/rules/:id` | Get profile rules |
-| PUT | `/api/rules/:id` | Update profile rules |
-| POST | `/api/monitor/start` | Start live monitoring |
-| POST | `/api/monitor/stop` | Stop live monitoring |
+```mermaid
+graph LR
+    Root["📁 Alignix/"]
 
+    Root --> B["📁 backend/"]
+    Root --> F["📁 frontend/"]
 
+    B --> BM["🐍 main.py"]
+    B --> API["📁 api/"]
+    B --> ENG["📁 engines/"]
+    B --> SVC["📁 services/"]
+    B --> DBS["📁 db/"]
+    B --> TPL["📁 templates/"]
 
+    API --> R["routes.py"]
+    API --> SE["socket_events.py"]
 
-# Alignix — Architecture & Diagrams
+    ENG --> E1["analyzer.py"]
+    ENG --> E2["understanding_engine.py"]
+    ENG --> E3["rule_engine.py"]
+    ENG --> E4["correction.py"]
+    ENG --> E5["sandbox_engine.py"]
+    ENG --> E6["page_map_engine.py"]
+    ENG --> E7["layout_stabilizer.py"]
+    ENG --> E8["monitor.py"]
+    ENG --> E9["word_com.py"]
+    ENG --> E10["batch_engine.py"]
+    ENG --> E11["export.py"]
 
-> Autonomous Document Formatting Intelligence Platform
+    F --> EL["📁 electron/"]
+    F --> SRC["📁 src/"]
 
----
+    EL --> MC["main.cjs"]
+    EL --> PC["preload.cjs"]
 
-## 1. System Architecture
+    SRC --> PG["📁 pages/"]
+    SRC --> CO["📁 components/"]
+    SRC --> ST["appStore.js"]
+    SRC --> AX["api.js"]
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        ALIGNIX DESKTOP APP                          │
-│                     (Electron Shell — Windows)                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌─────────────────────────────────────────────────────────────┐   │
-│   │                    FRONTEND LAYER                           │   │
-│   │              React + Tailwind CSS + Zustand                 │   │
-│   │                                                             │   │
-│   │  Dashboard │ Safe Review │ Monitor │ Rules │ Templates      │   │
-│   │  Batch     │ Insights    │ Settings                         │   │
-│   └──────────────────────┬──────────────────────────────────────┘   │
-│                          │  HTTP (Axios) + WebSocket (Socket.IO)    │
-│   ┌──────────────────────▼──────────────────────────────────────┐   │
-│   │                    BACKEND LAYER                            │   │
-│   │              Python — Flask + Flask-SocketIO                │   │
-│   │                                                             │   │
-│   │  REST API (routes.py)  │  Socket Events (socket_events.py)  │   │
-│   └──────────────────────┬──────────────────────────────────────┘   │
-│                          │                                          │
-│   ┌──────────────────────▼──────────────────────────────────────┐   │
-│   │                    ENGINE LAYER                             │   │
-│   │                                                             │   │
-│   │  Understanding  │  Rule Engine  │  Correction Engine        │   │
-│   │  Page Map       │  Sandbox      │  Layout Stabilizer        │   │
-│   │  Structure      │  Monitor      │  Batch Engine             │   │
-│   │  Word COM       │  Export       │  Analyzer                 │   │
-│   └──────────────────────┬──────────────────────────────────────┘   │
-│                          │                                          │
-│   ┌──────────────────────▼──────────────────────────────────────┐   │
-│   │                  PERSISTENCE LAYER                          │   │
-│   │           SQLite (SQLAlchemy) — alignix.db                  │   │
-│   │                                                             │   │
-│   │  profiles │ rules │ document_sessions │ correction_logs     │   │
-│   │  integrity_locks                                            │   │
-│   └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+    PG --> P1["dashboard/"]
+    PG --> P2["review/"]
+    PG --> P3["monitor/"]
+    PG --> P4["rules/"]
+    PG --> P5["batch/"]
+    PG --> P6["insights/"]
 ```
 
 ---
 
-## 2. Folder Structure
+## 🔄 Safe Review Workflow
 
-```
-Alignix/
-│
-├── backend/
-│   ├── main.py                      # Flask + SocketIO entry point
-│   ├── requirements.txt
-│   │
-│   ├── api/
-│   │   ├── routes.py                # All REST endpoints
-│   │   └── socket_events.py         # WebSocket event handlers
-│   │
-│   ├── engines/
-│   │   ├── analyzer.py              # Basic document analysis
-│   │   ├── understanding_engine.py  # Deep structural analysis + confidence
-│   │   ├── rule_engine.py           # Formatting rule application
-│   │   ├── correction.py            # Correction orchestrator + rollback
-│   │   ├── sandbox_engine.py        # Safe preview environment
-│   │   ├── page_map_engine.py       # Page boundary detection + protection
-│   │   ├── layout_stabilizer.py     # Orphan/overflow/spacing fixes
-│   │   ├── structure_analyzer.py    # Hierarchy detection
-│   │   ├── monitor.py               # Watchdog file monitoring
-│   │   ├── word_com.py              # Microsoft Word COM integration
-│   │   ├── batch_engine.py          # Multi-document processing
-│   │   └── export.py                # DOCX / PDF export
-│   │
-│   ├── services/
-│   │   ├── profile_service.py       # Profile + rule CRUD
-│   │   └── document_service.py      # Session + monitor lifecycle
-│   │
-│   ├── db/
-│   │   └── database.py              # SQLAlchemy models + migrations
-│   │
-│   └── templates/
-│       └── builtin.py               # 6 built-in formatting profiles
-│
-└── frontend/
-    ├── electron/
-    │   ├── main.cjs                 # Electron main process
-    │   └── preload.cjs              # Secure IPC bridge
-    │
-    └── src/
-        ├── pages/
-        │   ├── dashboard/           # Upload, analyze, correct, export
-        │   ├── review/              # Safe Review 5-step workflow
-        │   ├── monitor/             # Live monitoring + Word COM
-        │   ├── rules/               # Visual rule editor
-        │   ├── templates/           # Profile manager
-        │   ├── batch/               # Multi-file automation
-        │   ├── insights/            # Health scores + charts
-        │   └── settings/            # App configuration
-        │
-        ├── components/
-        │   ├── Layout.jsx
-        │   ├── Sidebar.jsx
-        │   ├── TitleBar.jsx
-        │   ├── ErrorBoundary.jsx
-        │   └── ui/
-        │       ├── ScoreRing.jsx
-        │       ├── IssueOverlay.jsx
-        │       └── NotificationStack.jsx
-        │
-        ├── store/appStore.js         # Zustand global state
-        ├── services/api.js           # Axios API client
-        ├── hooks/useSocket.js        # Socket.IO real-time hook
-        └── styles/globals.css        # Tailwind base styles
+```mermaid
+flowchart TD
+    A([🗂️ User Opens DOCX]) --> B
+
+    B["🧠 STEP 1 — ANALYZE\nDocumentUnderstandingEngine.understand()\nAssigns role + confidence to every element\nCalculates structure / layout / risk scores"]
+
+    B --> C{Confidence < 60%?\nClarifications needed?}
+
+    C -->|YES| D["❓ STEP 2 — CLARIFY\nAsk targeted questions\nfor low-confidence elements only\nMax 5 questions"]
+
+    C -->|NO| E
+    D --> E
+
+    E["🎯 STEP 3 — SCOPE\nPage Range Selector\nExclude Pages Input\nProtected Pages Manager\nElement Type Filter\nVisual Page Map"]
+
+    E --> F["👁️ STEP 4 — PREVIEW\nSandboxEngine.create_preview()\nClone document\nApply scoped rules\nSkip excluded pages\nLayout stabilization\nReturn diff — original untouched"]
+
+    F --> G{User approves?}
+
+    G -->|✅ YES| H["✅ STEP 5 — DONE\nSandboxEngine.commit()\nReplace original with sandbox\nPersist correction log\nRe-analyze document"]
+
+    G -->|❌ NO| I([🗑️ Discard sandbox\nReturn to Scope])
+
+    I --> E
+
+    style A fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style B fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style D fill:#3d2a00,stroke:#f59e0b,color:#fff
+    style E fill:#1e2535,stroke:#a78bfa,color:#fff
+    style F fill:#1e2535,stroke:#22c55e,color:#fff
+    style H fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style I fill:#2a1515,stroke:#ef4444,color:#fff
 ```
 
 ---
 
-## 3. Safe Review Workflow
+## 📄 Page-Scoped Correction Flow
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SAFE REVIEW WORKFLOW                         │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["👤 User defines scope\ninclude_pages: '3-15'\nexclude_pages: '1,2,20'\nprotected_pages: [1, 2, 21]"]
 
-  User Opens DOCX
-        │
-        ▼
-┌───────────────┐
-│   STEP 1      │  DocumentUnderstandingEngine.understand()
-│   ANALYZE     │  → Assigns role + confidence to every element
-│               │  → Calculates structure / layout / risk scores
-└───────┬───────┘
-        │
-        ▼
-  Clarifications needed?
-  (confidence < 60%)
-        │
-   YES  │  NO
-        │   └──────────────────────┐
-        ▼                          ▼
-┌───────────────┐          ┌───────────────┐
-│   STEP 2      │          │   STEP 3      │
-│   CLARIFY     │─────────▶│   SCOPE       │
-│               │          │               │
-│ Ask targeted  │          │ Page ranges   │
-│ questions for │          │ Exclude pages │
-│ low-conf      │          │ Protect pages │
-│ elements only │          │ Element types │
-└───────────────┘          └───────┬───────┘
-                                   │
-                                   ▼
-                           ┌───────────────┐
-                           │   STEP 4      │  SandboxEngine.create_preview()
-                           │   PREVIEW     │  → Clone document
-                           │               │  → Apply scoped rules
-                           │ Show diff     │  → Skip excluded pages
-                           │ Affected pages│  → Layout stabilization
-                           │ Change count  │  → Return diff (no save)
-                           └───────┬───────┘
-                                   │
-                          User approves?
-                                   │
-                        YES        │  NO
-                         │         └──── Discard sandbox
-                         ▼
-                 ┌───────────────┐
-                 │   STEP 5      │  SandboxEngine.commit()
-                 │   DONE        │  → Replace original with sandbox
-                 │               │  → Persist correction log
-                 │ Re-analyze    │  → Re-analyze document
-                 └───────────────┘
+    A --> B["🗺️ PageMapEngine.build_page_map()\nDetect page breaks in XML\nAssign paragraph → page number\nAuto-detect protected pages\nTitle · TOC · Appendix · Signature"]
+
+    B --> C["🔢 Resolve excluded_pages set\nexcluded = exclude_pages\n∪ protected_pages\n∪ all_pages − include_pages"]
+
+    C --> D["📐 RuleEngine.apply_rules()"]
+
+    D --> E{Page in\nexcluded_pages?}
+
+    E -->|YES 🔒| F([⏭️ SKIP — never modify])
+    E -->|NO ✅| G([✏️ Apply formatting rule])
+
+    G --> H["📊 Preview diff shows\nPages modified: 4-15\nPages excluded: 1, 2, 20\nTotal pages: 22"]
+
+    style A fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style B fill:#1e2535,stroke:#a78bfa,color:#fff
+    style C fill:#1e2535,stroke:#f59e0b,color:#fff
+    style D fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style F fill:#2a1515,stroke:#ef4444,color:#fff
+    style G fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style H fill:#1e2535,stroke:#22c55e,color:#fff
 ```
 
 ---
 
-## 4. Page-Scoped Correction Flow
+## 🧠 Document Understanding Engine
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  PAGE SCOPE RESOLUTION                          │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    IN([📄 Input: DOCX file]) --> PARA
 
-  User defines scope:
-  ┌─────────────────────────────────────────────────────────┐
-  │  include_pages:   "3-15"      (only these pages)        │
-  │  exclude_pages:   "1,2,20"    (never touch these)       │
-  │  protected_pages: [1, 2, 21]  (locked by user)          │
-  └─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-              PageMapEngine.build_page_map()
-              ┌─────────────────────────────┐
-              │ Detect page breaks in XML   │
-              │ Assign para → page number   │
-              │ Auto-detect protected pages │
-              │ (title, TOC, appendix, etc) │
-              └──────────────┬──────────────┘
-                             │
-                             ▼
-              Resolve excluded_pages set:
-              excluded = exclude_pages
-                       ∪ protected_pages
-                       ∪ (all_pages − include_pages)
-                             │
-                             ▼
-              RuleEngine.apply_rules()
-              ┌─────────────────────────────┐
-              │ For each paragraph:         │
-              │   page = para_page_map[i]   │
-              │   if page in excluded_pages │
-              │     → SKIP (never modify)   │
-              │   else                      │
-              │     → Apply formatting rule │
-              └─────────────────────────────┘
-                             │
-                             ▼
-              Preview diff shows:
-              ┌─────────────────────────────┐
-              │  Pages modified:  4-15      │
-              │  Pages excluded:  1, 2, 20  │
-              │  Total pages:     22        │
-              └─────────────────────────────┘
+    PARA["🔍 For each paragraph"]
+
+    PARA --> ROLE["🏷️ ROLE INFERENCE\n1. Style-based → Heading 1 style → heading1 97%\n2. Pattern-based → ^\d+\.\d+ → heading2 75%\n3. Size+Bold → size > body+6pt → heading1 70%\n4. ALL CAPS short → heading1 55%\n5. Default → body 90%"]
+
+    ROLE --> CONF["📊 CONFIDENCE SCORING\nHIGH ≥ 85% → Auto-correct\nMEDIUM 60-85% → Apply with caution\nLOW < 60% → Ask clarification"]
+
+    CONF --> SCORES["📈 DOCUMENT-LEVEL SCORES\nStructure Confidence = avg element confidences\nLayout Confidence = 1 − high_risk / total\nCorrection Risk = low_conf_count / total"]
+
+    SCORES --> OUT["📦 Output\nelements[] → role, confidence, risk, issues\nclarifications → max 5 targeted questions\nissues[] → font, size, alignment, orphan\nconfidence{} → structure, layout, risk\nstats{} → counts per element type"]
+
+    style IN fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style ROLE fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style CONF fill:#3d2a00,stroke:#f59e0b,color:#fff
+    style SCORES fill:#1e2535,stroke:#a78bfa,color:#fff
+    style OUT fill:#0f2a1a,stroke:#22c55e,color:#fff
 ```
 
 ---
 
-## 5. Document Understanding Engine
+## 👁️ Live Monitoring Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              DOCUMENT UNDERSTANDING ENGINE                      │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph ModeA["📁 Mode A — File System Watchdog"]
+        W1["watchdog.Observer\nwatches document directory"]
+        W2["on_modified event"]
+        W3["Debounce timer 1.5s"]
+        W4["check_violations()"]
+        W1 --> W2 --> W3 --> W4
+    end
 
-  Input: DOCX file
-        │
-        ▼
-  For each paragraph:
-  ┌─────────────────────────────────────────────────────────┐
-  │                   ROLE INFERENCE                        │
-  │                                                         │
-  │  1. Style-based    → "Heading 1" style → heading1 (97%)│
-  │  2. Pattern-based  → "^\d+\.\d+" → heading2 (75%)      │
-  │  3. Size+Bold      → size > body+6pt → heading1 (70%)  │
-  │  4. ALL CAPS short → heading1 (55%)                    │
-  │  5. Default        → body (90%)                        │
-  └──────────────────────────┬──────────────────────────────┘
-                             │
-                             ▼
-  ┌─────────────────────────────────────────────────────────┐
-  │                CONFIDENCE SCORING                       │
-  │                                                         │
-  │  HIGH   ≥ 85%  → Apply correction automatically        │
-  │  MEDIUM 60-85% → Apply with caution                    │
-  │  LOW    < 60%  → Ask clarification question            │
-  └──────────────────────────┬──────────────────────────────┘
-                             │
-                             ▼
-  ┌─────────────────────────────────────────────────────────┐
-  │              DOCUMENT-LEVEL SCORES                      │
-  │                                                         │
-  │  Structure Confidence  = avg(element confidences)       │
-  │  Layout Confidence     = 1 - (high_risk / total)        │
-  │  Correction Risk       = low_conf_count / total         │
-  └──────────────────────────┬──────────────────────────────┘
-                             │
-                             ▼
-  Output:
-  ┌─────────────────────────────────────────────────────────┐
-  │  elements[]      → role, confidence, risk, issues       │
-  │  clarifications  → max 5 targeted questions             │
-  │  issues[]        → font, size, alignment, orphan        │
-  │  confidence{}    → structure, layout, correction_risk   │
-  │  stats{}         → counts per element type              │
-  └─────────────────────────────────────────────────────────┘
+    subgraph ModeB["🔗 Mode B — Word COM pywin32"]
+        C1["Poll Word.Application\nevery 2 seconds"]
+        C2["doc.Saved transition\nFalse → True"]
+        C3["User just saved"]
+        C4["check_violations()"]
+        C1 --> C2 --> C3 --> C4
+    end
+
+    W4 --> DEC{Violations\nfound?}
+    C4 --> DEC
+
+    DEC -->|YES| FIX["✏️ correct()\nauto-repair formatting"]
+    DEC -->|NO| CLEAN["✅ emit monitor:clean"]
+
+    FIX --> EMIT["📡 emit monitor:corrected\n{path, source, violations, changes}"]
+
+    EMIT --> SOCK["🔌 Socket.IO → useSocket hook"]
+    CLEAN --> SOCK
+
+    SOCK --> STORE["🗃️ Zustand Store"]
+    STORE --> UI["🔔 NotificationStack\n📋 Monitor Event Log"]
+
+    style ModeA fill:#1e2535,stroke:#4f8ef7
+    style ModeB fill:#1e2535,stroke:#a78bfa
+    style FIX fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style CLEAN fill:#0f2a1a,stroke:#22c55e,color:#fff
 ```
 
 ---
 
-## 6. Live Monitoring Architecture
+## 🔁 Correction Engine & Rollback
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  LIVE MONITORING SYSTEM                         │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    START(["⚡ correct(path, profile_id)"]) --> BACKUP
 
-  Two monitoring modes run in parallel:
+    BACKUP["💾 1. BACKUP\ncopy original →\n.alignix_backups/name.timestamp.bak"]
 
-  MODE A — File System (Watchdog)
-  ┌─────────────────────────────────────────────────────────┐
-  │  watchdog.Observer watches document directory           │
-  │        │                                                │
-  │        ▼  on_modified event                             │
-  │  Debounce timer (1.5s)                                  │
-  │        │                                                │
-  │        ▼                                                │
-  │  CorrectionEngine.check_violations()                    │
-  │        │                                                │
-  │  violations?  YES → correct() → emit monitor:corrected  │
-  │               NO  →            emit monitor:clean       │
-  └─────────────────────────────────────────────────────────┘
+    BACKUP --> LOAD["📂 2. LOAD\nDocument(path) → python-docx object"]
 
-  MODE B — Word COM (pywin32)
-  ┌─────────────────────────────────────────────────────────┐
-  │  Poll Word.Application every 2 seconds                  │
-  │        │                                                │
-  │        ▼  doc.Saved transition: False → True            │
-  │  User just saved the document                           │
-  │        │                                                │
-  │        ▼                                                │
-  │  CorrectionEngine.check_violations()                    │
-  │        │                                                │
-  │  violations?  YES → correct() → emit monitor:corrected  │
-  │               NO  →            emit monitor:clean       │
-  └─────────────────────────────────────────────────────────┘
+    LOAD --> RULES["📐 3. APPLY RULES\nRuleEngine.apply_rules()\nSkip excluded pages\nApply font · size · bold · color · alignment · spacing\nReturns change log"]
 
-  Both modes push events via Socket.IO → Frontend useSocket hook
-  → Zustand store → NotificationStack + Monitor event log
+    RULES --> LAYOUT["📏 4. LAYOUT STABILIZATION\nLayoutStabilizer.stabilize()\nKeep-with-next on headings\nTable autofit\nSpacing collapse prevention\nWidow/orphan control"]
+
+    LAYOUT --> SAVE["💿 5. SAFE SAVE\ndoc.save(path + .alignix_tmp)\n_safe_replace(tmp → original)\nRetries 5× if file locked"]
+
+    SAVE --> LOG["🗃️ 6. PERSIST LOG\nCorrectionLog entries → SQLite"]
+
+    LOG --> SUCCESS(["✅ Return\nstatus · changes · log · layout_actions"])
+
+    RULES -->|Exception| ERR
+    LAYOUT -->|Exception| ERR
+    SAVE -->|Exception| ERR
+
+    ERR["❌ ERROR HANDLER"]
+    ERR --> RESTORE["♻️ shutil.copy2(backup → original)\nRestore original file"]
+    RESTORE --> FAIL(["⚠️ Return\nerror · restored: True"])
+
+    style BACKUP fill:#1e2535,stroke:#f59e0b,color:#fff
+    style RULES fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style LAYOUT fill:#1e2535,stroke:#a78bfa,color:#fff
+    style SAVE fill:#1e2535,stroke:#22c55e,color:#fff
+    style SUCCESS fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style ERR fill:#2a1515,stroke:#ef4444,color:#fff
+    style RESTORE fill:#3d2a00,stroke:#f59e0b,color:#fff
+    style FAIL fill:#2a1515,stroke:#ef4444,color:#fff
 ```
 
 ---
 
-## 7. Correction Engine & Rollback
+## 📦 Batch Automation Flow
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              CORRECTION ENGINE — TRANSACTION FLOW               │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A(["👤 User selects N documents\n+ profile + export format"]) --> B
 
-  correct(path, profile_id)
-        │
-        ▼
-  1. BACKUP
-     └─ copy original → .alignix_backups/{name}.{timestamp}.bak
-        │
-        ▼
-  2. LOAD
-     └─ Document(path) → python-docx object
-        │
-        ▼
-  3. APPLY RULES
-     └─ RuleEngine.apply_rules(doc, rules, page_map, excluded_pages)
-        │  → skip excluded pages
-        │  → apply font, size, bold, color, alignment, spacing
-        │  → returns change log
-        │
-        ▼
-  4. LAYOUT STABILIZATION
-     └─ LayoutStabilizer.stabilize(doc)
-        │  → keep-with-next on headings
-        │  → table autofit
-        │  → spacing collapse prevention
-        │  → widow/orphan control
-        │
-        ▼
-  5. SAFE SAVE
-     └─ doc.save(path + ".alignix_tmp")
-        └─ _safe_replace(tmp → original)  ← retries 5× if file locked
-        │
-        ▼
-  6. PERSIST LOG
-     └─ CorrectionLog entries → SQLite
-        │
-        ▼
-  SUCCESS → return {status, changes, log, layout_actions}
+    B["🚀 BatchEngine.run()\nBackground thread"]
 
-  ON ANY ERROR:
-        └─ shutil.copy2(backup → original)  ← restore
-           return {error, restored: True}
+    B --> LOOP["🔄 For each document"]
+
+    LOOP --> S1["📊 1. health_score() — score before"]
+    S1 --> S2["✏️ 2. correct() — apply formatting"]
+    S2 --> S3["📊 3. health_score() — score after"]
+    S3 --> S4["📤 4. export() — DOCX or PDF optional"]
+    S4 --> S5["📡 5. emit batch:progress\n{current, total, result}"]
+
+    S5 --> MORE{More\ndocuments?}
+    MORE -->|YES| LOOP
+    MORE -->|NO| DONE
+
+    DONE["📡 emit batch:complete\n{total, succeeded, failed, results[]}"]
+
+    DONE --> UI["🖥️ Frontend\nProgress bar → Results table\nHealth delta per document"]
+
+    style A fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style B fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style DONE fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style UI fill:#1e2535,stroke:#a78bfa,color:#fff
 ```
 
 ---
 
-## 8. Batch Automation Flow
+## 🗄️ Database Schema
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   BATCH AUTOMATION ENGINE                       │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+erDiagram
+    profiles {
+        INTEGER id PK
+        TEXT name
+        TEXT description
+        BOOLEAN integrity_lock
+        DATETIME created_at
+    }
 
-  User selects N documents + profile + export format
-        │
-        ▼
-  BatchEngine.run() → background thread
-        │
-        ▼
-  For each document:
-  ┌─────────────────────────────────────────────────────────┐
-  │  1. health_score()     → score before                   │
-  │  2. correct()          → apply formatting               │
-  │  3. health_score()     → score after                    │
-  │  4. export()           → DOCX or PDF (optional)         │
-  │  5. emit batch:progress → {current, total, result}      │
-  └─────────────────────────────────────────────────────────┘
-        │
-        ▼
-  emit batch:complete → {total, succeeded, failed, results[]}
-        │
-        ▼
-  Frontend: progress bar → results table with health delta
-```
+    rules {
+        INTEGER id PK
+        INTEGER profile_id FK
+        TEXT element
+        TEXT font_name
+        REAL font_size
+        INTEGER bold
+        INTEGER italic
+        TEXT color
+        TEXT alignment
+        REAL line_spacing
+        REAL space_before
+        REAL space_after
+    }
 
----
+    document_sessions {
+        INTEGER id PK
+        TEXT path
+        INTEGER profile_id FK
+        REAL integrity_score
+        REAL professionalism_score
+        REAL readability_score
+        REAL structural_score
+        INTEGER total_corrections
+        DATETIME last_analyzed
+    }
 
-## 9. Database Schema
+    correction_logs {
+        INTEGER id PK
+        INTEGER session_id FK
+        TEXT element
+        TEXT issue
+        TEXT action
+        DATETIME timestamp
+    }
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      DATABASE SCHEMA                            │
-│                    SQLite — alignix.db                          │
-└─────────────────────────────────────────────────────────────────┘
+    integrity_locks {
+        INTEGER id PK
+        TEXT path
+        INTEGER profile_id FK
+        BOOLEAN enabled
+        DATETIME created_at
+    }
 
-  profiles
-  ┌──────────────────────────────────────────┐
-  │ id            INTEGER  PK                │
-  │ name          TEXT     NOT NULL          │
-  │ description   TEXT                       │
-  │ integrity_lock BOOLEAN DEFAULT 0         │
-  │ created_at    DATETIME                   │
-  └──────────────────────────────────────────┘
-          │ 1
-          │ has many
-          │ N
-  rules
-  ┌──────────────────────────────────────────┐
-  │ id            INTEGER  PK                │
-  │ profile_id    INTEGER  FK → profiles     │
-  │ element       TEXT     (heading1, body…) │
-  │ font_name     TEXT                       │
-  │ font_size     REAL                       │
-  │ bold          INTEGER                    │
-  │ italic        INTEGER                    │
-  │ color         TEXT                       │
-  │ alignment     TEXT                       │
-  │ line_spacing  REAL                       │
-  │ space_before  REAL                       │
-  │ space_after   REAL                       │
-  └──────────────────────────────────────────┘
-
-  document_sessions
-  ┌──────────────────────────────────────────┐
-  │ id                  INTEGER  PK          │
-  │ path                TEXT     NOT NULL    │
-  │ profile_id          INTEGER  FK          │
-  │ integrity_score     REAL                 │
-  │ professionalism_score REAL               │
-  │ readability_score   REAL                 │
-  │ structural_score    REAL                 │
-  │ total_corrections   INTEGER              │
-  │ last_analyzed       DATETIME             │
-  └──────────────────────────────────────────┘
-          │ 1
-          │ has many
-          │ N
-  correction_logs
-  ┌──────────────────────────────────────────┐
-  │ id            INTEGER  PK                │
-  │ session_id    INTEGER  FK → sessions     │
-  │ element       TEXT                       │
-  │ issue         TEXT                       │
-  │ action        TEXT                       │
-  │ timestamp     DATETIME                   │
-  └──────────────────────────────────────────┘
-
-  integrity_locks
-  ┌──────────────────────────────────────────┐
-  │ id            INTEGER  PK                │
-  │ path          TEXT     UNIQUE            │
-  │ profile_id    INTEGER  FK → profiles     │
-  │ enabled       BOOLEAN                    │
-  │ created_at    DATETIME                   │
-  └──────────────────────────────────────────┘
+    profiles ||--o{ rules : "has many"
+    profiles ||--o{ document_sessions : "used in"
+    document_sessions ||--o{ correction_logs : "has many"
+    profiles ||--o{ integrity_locks : "locked by"
 ```
 
 ---
 
-## 10. API Reference
+## 🌐 API Reference
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                       REST API ENDPOINTS                        │
-│                    Base URL: http://127.0.0.1:5000/api          │
-└─────────────────────────────────────────────────────────────────┘
-
-  DOCUMENT
-  ─────────────────────────────────────────────────────────────────
-  POST  /document/analyze       Basic structural analysis
-  POST  /document/understand    Deep analysis + confidence scores
-  POST  /document/health        Health score (integrity/prof/read)
-  POST  /document/structure     Hierarchy detection
-  POST  /document/overlay       Violation data for UI overlay
-  POST  /document/history       Correction log for document
-  POST  /document/correct       Apply corrections directly
-  POST  /document/export        Export as DOCX or PDF
-  POST  /document/pagemap       Page boundary map + protected pages
-
-  SANDBOX (Safe Preview)
-  ─────────────────────────────────────────────────────────────────
-  POST  /sandbox/preview        Create sandbox + return diff
-  POST  /sandbox/commit         Apply sandbox to original
-  POST  /sandbox/discard        Delete sandbox copy
-
-  PROFILES & RULES
-  ─────────────────────────────────────────────────────────────────
-  GET   /profiles               List all profiles
-  POST  /profiles               Create profile
-  GET   /profiles/:id           Get profile
-  PUT   /profiles/:id           Update profile
-  DELETE /profiles/:id          Delete profile
-  GET   /rules/:profile_id      Get rules for profile
-  PUT   /rules/:profile_id      Update rules for profile
-
-  MONITOR
-  ─────────────────────────────────────────────────────────────────
-  POST  /monitor/start          Start file system monitoring
-  POST  /monitor/stop           Stop monitoring
-  GET   /monitor/status         Active monitored paths
-
-  INTEGRITY LOCK
-  ─────────────────────────────────────────────────────────────────
-  POST  /lock/enable            Enable integrity lock for document
-  POST  /lock/disable           Disable integrity lock
-  POST  /lock/status            Check lock status
-
-  WORD COM
-  ─────────────────────────────────────────────────────────────────
-  GET   /word/documents         List open Word documents
-  POST  /word/attach            Attach COM monitor to document
-  POST  /word/detach            Detach COM monitor
-
-  BATCH
-  ─────────────────────────────────────────────────────────────────
-  POST  /batch/run              Start batch processing (async)
-
-  WEBSOCKET EVENTS (Socket.IO)
-  ─────────────────────────────────────────────────────────────────
-  monitor:corrected   → {path, source, violations, changes}
-  monitor:clean       → {path, source}
-  batch:progress      → {current, total, result}
-  batch:complete      → {total, succeeded, failed, results[]}
+```mermaid
+mindmap
+  root((🔌 API\n:5000))
+    📄 Document
+      POST /document/analyze
+      POST /document/understand
+      POST /document/health
+      POST /document/structure
+      POST /document/overlay
+      POST /document/history
+      POST /document/correct
+      POST /document/export
+      POST /document/pagemap
+    🔒 Sandbox
+      POST /sandbox/preview
+      POST /sandbox/commit
+      POST /sandbox/discard
+    👤 Profiles
+      GET /profiles
+      POST /profiles
+      PUT /profiles/:id
+      DELETE /profiles/:id
+    📐 Rules
+      GET /rules/:id
+      PUT /rules/:id
+    👁️ Monitor
+      POST /monitor/start
+      POST /monitor/stop
+      GET /monitor/status
+    🔐 Lock
+      POST /lock/enable
+      POST /lock/disable
+      POST /lock/status
+    🔗 Word COM
+      GET /word/documents
+      POST /word/attach
+      POST /word/detach
+    📦 Batch
+      POST /batch/run
 ```
 
 ---
 
-## 11. Frontend State Architecture
+## 🗃️ Frontend State Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  ZUSTAND GLOBAL STATE                           │
-│                      appStore.js                                │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    STORE["🗃️ Zustand — appStore.js"]
 
-  Document State
-  ├── activeDocument        string | null
-  ├── analysisResult        object | null
-  ├── understanding         object | null   (deep analysis)
-  ├── healthScore           object | null
-  ├── overlayData           array
-  ├── structureResult       object | null
-  └── correctionHistory     array
+    STORE --> DOC["📄 Document State\nactiveDocument\nanalysisResult\nunderstanding\nhealthScore\noverlayData\ncorrectionHistory"]
 
-  Page Scope State
-  ├── pageMap               object | null
-  └── pageScope
-      ├── include_pages     string  "3-15"
-      ├── exclude_pages     string  "1,2,20"
-      ├── protected_pages   number[]
-      └── elements          string[]
+    STORE --> PAGE["📄 Page Scope State\npageMap\npageScope\n  include_pages\n  exclude_pages\n  protected_pages\n  elements"]
 
-  Safe Review State
-  ├── sandboxPreview        object | null
-  ├── sandboxScope          object | null
-  ├── clarificationAnswers  {[id]: value}
-  └── reviewStep            string
+    STORE --> REVIEW["🔒 Safe Review State\nsandboxPreview\nsandboxScope\nclarificationAnswers\nreviewStep"]
 
-  Profile State
-  ├── profiles              array
-  └── activeProfileId       number | null
+    STORE --> PROFILE["👤 Profile State\nprofiles\nactiveProfileId"]
 
-  Monitor State
-  ├── isMonitoring          boolean
-  ├── integrityLocked       boolean
-  ├── monitorEvents         array (max 200)
-  └── wordDocuments         array
+    STORE --> MONITOR["👁️ Monitor State\nisMonitoring\nintegrityLocked\nmonitorEvents max 200\nwordDocuments"]
 
-  Batch State
-  ├── batchRunning          boolean
-  ├── batchProgress         object | null
-  └── batchResults          array
+    STORE --> BATCH["📦 Batch State\nbatchRunning\nbatchProgress\nbatchResults"]
 
-  UI State
-  ├── loading               {[key]: boolean}
-  └── notifications         array (max 8, auto-dismiss 4s)
+    STORE --> UI["🎨 UI State\nloading key boolean\nnotifications max 8"]
+
+    style STORE fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style DOC fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style PAGE fill:#1e2535,stroke:#a78bfa,color:#fff
+    style REVIEW fill:#1e2535,stroke:#22c55e,color:#fff
+    style PROFILE fill:#1e2535,stroke:#f59e0b,color:#fff
+    style MONITOR fill:#1e2535,stroke:#ef4444,color:#fff
+    style BATCH fill:#1e2535,stroke:#f472b6,color:#fff
+    style UI fill:#1e2535,stroke:#6b7280,color:#fff
 ```
 
 ---
 
-## 12. Electron IPC Bridge
+## 🔌 Electron IPC Bridge
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    ELECTRON IPC BRIDGE                          │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant R as 🎨 Renderer (React)
+    participant P as 🔒 Preload (contextBridge)
+    participant M as ⚙️ Main Process (Electron)
+    participant PY as 🐍 Python Backend
 
-  Renderer Process (React)          Main Process (Electron)
-  ────────────────────────          ───────────────────────
-  window.electron.openFile()   →    dialog.showOpenDialog()
-  window.electron.saveFile()   →    dialog.showSaveDialog()
-  window.electron.openPath()   →    shell.openPath()
-  window.electron.minimize()   →    mainWindow.minimize()
-  window.electron.maximize()   →    mainWindow.maximize()
-  window.electron.close()      →    app.quit()
+    Note over M,PY: App startup
+    M->>PY: spawn venv/Scripts/python.exe main.py
+    PY-->>M: Flask running on :5000
 
-  Security model:
-  ├── contextIsolation: true
-  ├── nodeIntegration: false
-  └── All APIs exposed via contextBridge (preload.cjs)
+    Note over R,M: Window controls
+    R->>P: window.electron.minimize()
+    P->>M: ipcRenderer.invoke("window:minimize")
+    M-->>R: mainWindow.minimize()
 
-  Python Backend Lifecycle:
-  ├── Spawned on app.whenReady()
-  ├── Uses venv/Scripts/python.exe (dev)
-  ├── Killed on window-all-closed
-  └── Retry on did-fail-load (React not ready yet)
-```
+    Note over R,M: File dialogs
+    R->>P: window.electron.openFile()
+    P->>M: ipcRenderer.invoke("dialog:openFile")
+    M-->>R: filePath string
 
----
+    Note over R,PY: API calls (direct HTTP)
+    R->>PY: POST /api/document/analyze
+    PY-->>R: {paragraphs, issues, stats}
 
-## 13. Built-in Formatting Profiles
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  BUILT-IN TEMPLATES                             │
-└─────────────────────────────────────────────────────────────────┘
-
-  Profile           Font              Body    Heading 1   Spacing
-  ──────────────────────────────────────────────────────────────
-  IEEE Paper        Times New Roman   10pt    14pt Bold   1.0×
-  College Report    Times New Roman   12pt    18pt Bold   1.5×
-  Business Proposal Calibri           11pt    20pt Bold   1.15×
-  Legal Document    Times New Roman   12pt    14pt Bold   2.0×
-  Resume            Calibri           11pt    16pt Bold   1.15×
-  Dissertation      Times New Roman   12pt    16pt Bold   2.0×
+    Note over PY,R: Real-time events
+    PY->>R: Socket.IO emit monitor:corrected
+    R-->>R: Zustand store update → UI notification
 ```
 
 ---
 
-## 14. Confidence Scoring Reference
+## 🎯 Confidence Scoring Reference
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│               CONFIDENCE SCORING SYSTEM                         │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph Sources["🔍 Detection Sources"]
+        S1["📝 Style 'Heading 1'\nWord built-in → 97%"]
+        S2["📝 Style 'Title'\nWord title → 95%"]
+        S3["📝 Style 'Caption'\nWord caption → 92%"]
+        S4["🔢 Pattern ^\d+\.\d+\nNumbered section → 75-78%"]
+        S5["🔠 Size+Bold > +6pt\nLarge bold text → 70%"]
+        S6["🔡 ALL CAPS < 60 chars\nShort caps line → 55%"]
+        S7["📄 Default body text\nNormal paragraph → 90%"]
+    end
 
-  Element Detection Confidence:
-  ┌──────────────────────────────────────────────────────────┐
-  │  Source              Example              Confidence     │
-  │  ──────────────────────────────────────────────────────  │
-  │  Style "Heading 1"   Word built-in style  97%            │
-  │  Style "Title"       Word title style     95%            │
-  │  Style "Caption"     Word caption style   92%            │
-  │  Pattern "^\d+\.\d+" Numbered section     75-78%         │
-  │  Size+Bold > +6pt    Large bold text      70%            │
-  │  ALL CAPS < 60 chars Short caps line      55%            │
-  │  Default body text   Normal paragraph     90%            │
-  └──────────────────────────────────────────────────────────┘
+    subgraph Thresholds["⚖️ Thresholds"]
+        T1["🟢 ≥ 85% HIGH\nAuto-correct\nno question asked"]
+        T2["🟡 60-85% MEDIUM\nCorrect with caution"]
+        T3["🔴 < 60% LOW\nAsk clarification question"]
+    end
 
-  Thresholds:
-  ┌──────────────────────────────────────────────────────────┐
-  │  ≥ 85%   HIGH    → Auto-correct, no question asked       │
-  │  60-85%  MEDIUM  → Correct with caution                  │
-  │  < 60%   LOW     → Ask clarification question            │
-  └──────────────────────────────────────────────────────────┘
+    subgraph Risk["📊 Document Risk"]
+        R1["Correction Risk =\nlow_conf_elements / total"]
+        R2["🔴 > 50% → High risk warning"]
+        R3["🟡 > 40% → Warning shown"]
+        R4["🟢 < 25% → Safe to proceed"]
+    end
 
-  Document-Level Risk:
-  ┌──────────────────────────────────────────────────────────┐
-  │  Correction Risk = low_confidence_elements / total       │
-  │  > 50%  → High risk warning shown                        │
-  │  > 40%  → Warning in scope selector                      │
-  │  < 25%  → Safe to proceed automatically                  │
-  └──────────────────────────────────────────────────────────┘
+    S1 & S2 & S3 --> T1
+    S4 & S5 --> T2
+    S6 --> T3
+    S7 --> T1
+    R1 --> R2 & R3 & R4
 ```
 
 ---
 
-## 15. Tech Stack Summary
+## 🛠️ Tech Stack
 
+```mermaid
+graph TB
+    subgraph Desktop["🖥️ Desktop Layer"]
+        EL["⚡ Electron 31\nWindow · IPC · Dialogs"]
+    end
+
+    subgraph Frontend["🎨 Frontend Layer"]
+        RE["⚛️ React 18\nComponent rendering"]
+        TW["🎨 Tailwind CSS 3\nUtility-first styling"]
+        ZU["🐻 Zustand 4\nGlobal state"]
+        RR["🔀 React Router 6\nPage navigation"]
+        RC["📊 Recharts 2\nHealth score charts"]
+        AX["📡 Axios\nREST API calls"]
+        SI["🔌 Socket.IO Client 4\nReal-time events"]
+        VI["⚡ Vite 5\nDev server + bundler"]
+    end
+
+    subgraph Backend["⚙️ Backend Layer"]
+        PY["🐍 Python 3.13\nRuntime"]
+        FL["🌶️ Flask 3\nWeb framework"]
+        FS["🔌 Flask-SocketIO\nWebSocket server"]
+        PD["📄 python-docx 1.1\nDOCX read/write"]
+        LX["🔬 lxml 6\nXML processing"]
+        WD["👁️ watchdog 5\nFile monitoring"]
+        PW["🔗 pywin32 311\nWord COM automation"]
+        SA["🗃️ SQLAlchemy 2.0\nDatabase ORM"]
+        SL["💾 SQLite\nLocal persistence"]
+    end
+
+    EL --> RE
+    RE --> TW & ZU & RR & RC & AX & SI
+    AX & SI --> FL
+    FL --> FS & PD & LX & WD & PW & SA
+    SA --> SL
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      TECH STACK                                 │
-└─────────────────────────────────────────────────────────────────┘
 
-  Layer             Technology              Purpose
-  ──────────────────────────────────────────────────────────────
-  Desktop Shell     Electron 31             Window management, IPC
-  UI Framework      React 18                Component rendering
-  Styling           Tailwind CSS 3          Utility-first CSS
-  State             Zustand 4               Global state management
-  Routing           React Router 6          Page navigation
-  Charts            Recharts 2              Health score charts
-  Icons             Lucide React            UI icons
-  HTTP Client       Axios                   REST API calls
-  WebSocket         Socket.IO Client 4      Real-time events
-  Build Tool        Vite 5                  Dev server + bundler
-  Packaging         Electron Builder        Windows installer
+---
 
-  Backend           Python 3.13             Runtime
-  Web Framework     Flask 3 + Flask-SocketIO REST + WebSocket server
-  DOCX Processing   python-docx 1.1         Document read/write
-  XML Processing    lxml 6                  Low-level XML ops
-  File Monitoring   watchdog 5              File system events
-  Word Automation   pywin32 311             COM automation
-  Database ORM      SQLAlchemy 2.0          DB abstraction
-  Database          SQLite                  Local persistence
-  CORS              Flask-CORS              Cross-origin requests
+## 📋 Built-in Templates
+
+| 📄 Template | 🔤 Font | 📏 Body | 📌 Heading 1 | ↕️ Spacing |
+|---|---|---|---|---|
+| 🔬 IEEE Paper | Times New Roman | 10pt | 14pt Bold | 1.0× |
+| 🎓 College Report | Times New Roman | 12pt | 18pt Bold | 1.5× |
+| 💼 Business Proposal | Calibri | 11pt | 20pt Bold | 1.15× |
+| ⚖️ Legal Document | Times New Roman | 12pt | 14pt Bold | 2.0× |
+| 📋 Resume | Calibri | 11pt | 16pt Bold | 1.15× |
+| 🎓 Dissertation | Times New Roman | 12pt | 16pt Bold | 2.0× |
+
+---
+
+## 🔗 Core Workflow
+
+```mermaid
+flowchart LR
+    A([📂 Open DOCX]) --> B[🧠 Analyze Structure]
+    B --> C[🔍 Detect Issues]
+    C --> D[🎯 Select Profile]
+    D --> E[📄 Set Page Scope]
+    E --> F[👁️ Preview Changes]
+    F --> G{Approve?}
+    G -->|✅| H[✏️ Apply Corrections]
+    G -->|❌| E
+    H --> I[📤 Export DOCX/PDF]
+    H --> J[👁️ Start Live Monitor]
+    J --> K{Document saved?}
+    K -->|Violations| L[⚡ Auto-correct]
+    K -->|Clean| M[✅ Notify clean]
+    L --> K
+
+    style A fill:#1e2535,stroke:#4f8ef7,color:#fff
+    style H fill:#0f2a1a,stroke:#22c55e,color:#fff
+    style L fill:#1e3a6e,stroke:#4f8ef7,color:#fff
+    style I fill:#1e2535,stroke:#a78bfa,color:#fff
 ```
+
+---
+
+<div align="center">
+
+**Built with ❤️ — Alignix © 2024**
+
+*A self-maintaining professional document intelligence platform*
+
+</div>
