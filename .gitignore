@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+venv/
+.venv/
+env/
+.env
+
+# Database
+backend/db/alignix.db
+
+# Backups created by Alignix
+.alignix_backups/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Vite / Electron build output
+frontend/dist/
+dist-electron/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log
+logs/
