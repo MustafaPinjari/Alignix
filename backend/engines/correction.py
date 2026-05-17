@@ -4,6 +4,8 @@ Includes rollback safety and integrity lock support.
 """
 import shutil
 import os
+import tempfile
+import time
 from datetime import datetime
 from docx import Document
 
@@ -22,6 +24,7 @@ class CorrectionEngine:
             return {"error": "No rules found for profile"}
 
         backup = self._backup(path)
+        tmp_path = path + ".alignix_tmp"
         try:
             doc = Document(path)
             doc, log = RuleEngine().apply_rules(doc, rules)
@@ -30,7 +33,9 @@ class CorrectionEngine:
             if stabilize:
                 layout_actions = LayoutStabilizer().stabilize(doc)
 
-            doc.save(path)
+            # Save to temp file first, then atomically replace
+            doc.save(tmp_path)
+            self._safe_replace(tmp_path, path)
             self._persist_log(path, profile_id, log)
             return {
                 "status": "corrected",
@@ -40,6 +45,11 @@ class CorrectionEngine:
                 "backup": backup,
             }
         except Exception as e:
+            if os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
             self._restore(backup, path)
             return {"error": str(e), "restored": True}
 
@@ -78,6 +88,18 @@ class CorrectionEngine:
         if t == "font_name":
             return f"Font should be {v['expected']} (found {v['actual']})"
         return f"{t.replace('_', ' ').title()} violation"
+
+    def _safe_replace(self, src: str, dst: str, retries: int = 5, delay: float = 0.8):
+        """Replace dst with src, retrying if the file is locked by Word."""
+        for attempt in range(retries):
+            try:
+                shutil.move(src, dst)
+                return
+            except (PermissionError, OSError):
+                if attempt < retries - 1:
+                    time.sleep(delay)
+                else:
+                    raise
 
     def _backup(self, path: str) -> str:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")

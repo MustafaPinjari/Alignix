@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, ForeignKey, Boolean, text
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
 import os
@@ -74,6 +74,21 @@ class IntegrityLock(Base):
 
 def init_db():
     Base.metadata.create_all(engine)
+    _migrate()
+
+def _migrate():
+    """Add new columns to existing DB without dropping data."""
+    migrations = [
+        "ALTER TABLE profiles ADD COLUMN integrity_lock BOOLEAN DEFAULT 0",
+        "ALTER TABLE document_sessions ADD COLUMN total_corrections INTEGER DEFAULT 0",
+    ]
+    with engine.connect() as conn:
+        for sql in migrations:
+            try:
+                conn.execute(text(sql))
+                conn.commit()
+            except Exception:
+                pass  # column already exists
 
 
 def get_session():
