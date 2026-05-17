@@ -1,19 +1,20 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, Activity, Sliders, BookTemplate,
-  BarChart2, Settings, FileText, Layers,
+  BarChart2, Settings, FileText, Layers, ShieldCheck,
 } from "lucide-react";
 import { useAppStore } from "@/store/appStore";
 import clsx from "clsx";
 
 const NAV = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/monitor", icon: Activity, label: "Live Monitor" },
-  { to: "/rules", icon: Sliders, label: "Rule Editor" },
-  { to: "/templates", icon: BookTemplate, label: "Templates" },
-  { to: "/batch", icon: Layers, label: "Batch" },
-  { to: "/analytics", icon: BarChart2, label: "Analytics" },
-  { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/review",    icon: ShieldCheck,     label: "Safe Review" },
+  { to: "/monitor",   icon: Activity,        label: "Live Monitor" },
+  { to: "/rules",     icon: Sliders,         label: "Rule Editor" },
+  { to: "/templates", icon: BookTemplate,    label: "Templates" },
+  { to: "/batch",     icon: Layers,          label: "Batch" },
+  { to: "/insights",  icon: BarChart2,       label: "Insights" },
+  { to: "/settings",  icon: Settings,        label: "Settings" },
 ];
 
 export default function Sidebar() {

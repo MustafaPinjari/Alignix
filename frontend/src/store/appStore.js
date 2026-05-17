@@ -1,6 +1,24 @@
 import { create } from "zustand";
 
 export const useAppStore = create((set, get) => ({
+  // Document understanding
+  understanding: null,
+  setUnderstanding: (u) => set({ understanding: u }),
+
+  // Sandbox / preview state
+  sandboxPreview: null,
+  setSandboxPreview: (p) => set({ sandboxPreview: p }),
+  sandboxScope: null,
+  setSandboxScope: (s) => set({ sandboxScope: s }),
+  clarificationAnswers: {},
+  setClarificationAnswer: (id, val) =>
+    set((s) => ({ clarificationAnswers: { ...s.clarificationAnswers, [id]: val } })),
+  clearClarifications: () => set({ clarificationAnswers: {} }),
+
+  // Review workflow step
+  reviewStep: "idle", // idle | analyzing | clarifying | previewing | committing
+  setReviewStep: (step) => set({ reviewStep: step }),
+
   // Active document
   activeDocument: null,
   setActiveDocument: (doc) => set({ activeDocument: doc }),

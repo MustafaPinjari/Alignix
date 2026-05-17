@@ -38,14 +38,20 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
-    icon: path.join(__dirname, "../public/icon.ico"),
   });
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:3000");
+    // Uncomment to open DevTools for debugging:
+    // mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+
+  mainWindow.webContents.on("did-fail-load", () => {
+    // Retry if React dev server not ready yet
+    setTimeout(() => mainWindow.loadURL("http://localhost:3000"), 1000);
+  });
 }
 
 app.whenReady().then(() => {

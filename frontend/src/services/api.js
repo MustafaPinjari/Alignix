@@ -2,6 +2,15 @@ import axios from "axios";
 
 const api = axios.create({ baseURL: "http://127.0.0.1:5000/api" });
 
+// Document Understanding
+export const understandDocument = (path) => api.post("/document/understand", { path });
+
+// Sandbox / Safe Preview
+export const sandboxPreview = (path, profile_id, scope, answers) =>
+  api.post("/sandbox/preview", { path, profile_id, scope, answers });
+export const sandboxCommit  = (path) => api.post("/sandbox/commit",  { path });
+export const sandboxDiscard = (path) => api.post("/sandbox/discard", { path });
+
 // Document
 export const analyzeDocument = (path) => api.post("/document/analyze", { path });
 export const correctDocument = (path, profile_id, stabilize = true) =>

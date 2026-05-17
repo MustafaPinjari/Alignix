@@ -3,6 +3,8 @@ from engines.analyzer import DocumentAnalyzer
 from engines.correction import CorrectionEngine
 from engines.export import ExportEngine
 from engines.structure_analyzer import StructureAnalyzer
+from engines.understanding_engine import DocumentUnderstandingEngine
+from engines.sandbox_engine import SandboxEngine
 from engines.batch_engine import BatchEngine
 from engines.word_com import get_open_documents, attach_word_monitor, detach_word_monitor
 from services.profile_service import ProfileService
@@ -50,7 +52,40 @@ def health():
     score = DocumentAnalyzer().health_score(path)
     return jsonify(score)
 
-@bp.route("/document/structure", methods=["POST"])
+@bp.route("/document/understand", methods=["POST"])
+def understand():
+    data = request.json
+    path = data.get("path")
+    if not path:
+        return jsonify({"error": "path required"}), 400
+    result = DocumentUnderstandingEngine().understand(path)
+    return jsonify(result)
+
+# ── Sandbox / Safe Preview ────────────────────────────────────────────────────
+
+@bp.route("/sandbox/preview", methods=["POST"])
+def sandbox_preview():
+    data = request.json
+    path       = data.get("path")
+    profile_id = data.get("profile_id")
+    scope      = data.get("scope")          # {elements: ["heading1", "body", ...]}
+    answers    = data.get("answers", {})    # clarification answers
+    result = SandboxEngine().create_preview(path, profile_id, scope, answers)
+    return jsonify(result)
+
+@bp.route("/sandbox/commit", methods=["POST"])
+def sandbox_commit():
+    data = request.json
+    result = SandboxEngine().commit(data["path"])
+    return jsonify(result)
+
+@bp.route("/sandbox/discard", methods=["POST"])
+def sandbox_discard():
+    data = request.json
+    SandboxEngine().discard(data["path"])
+    return jsonify({"ok": True})
+
+
 def structure():
     data = request.json
     path = data.get("path")
