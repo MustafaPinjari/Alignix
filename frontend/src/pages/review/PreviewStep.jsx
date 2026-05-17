@@ -44,6 +44,29 @@ export default function PreviewStep({ preview, loading, onCommit, onDiscard, com
           </div>
         </div>
 
+        {/* Affected pages summary */}
+        {(preview.affected_pages?.length > 0 || preview.excluded_pages?.length > 0) && (
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="p-3 rounded-xl bg-accent/8 border border-accent/20 text-center">
+              <div className="text-lg font-bold text-accent">{preview.affected_pages?.length || 0}</div>
+              <div className="text-xs text-muted mt-0.5">Pages modified</div>
+              {preview.affected_pages?.length > 0 && (
+                <div className="text-xs text-accent/70 mt-0.5 truncate">
+                  {preview.affected_pages.slice(0, 6).join(", ")}{preview.affected_pages.length > 6 ? "…" : ""}
+                </div>
+              )}
+            </div>
+            <div className="p-3 rounded-xl bg-surface-2 border border-border text-center">
+              <div className="text-lg font-bold text-muted">{preview.excluded_pages?.length || 0}</div>
+              <div className="text-xs text-muted mt-0.5">Pages excluded</div>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-2 border border-border text-center">
+              <div className="text-lg font-bold text-white">{preview.total_pages || 0}</div>
+              <div className="text-xs text-muted mt-0.5">Total pages</div>
+            </div>
+          </div>
+        )}
+
         {!safe_to_apply && (
           <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/8 border border-warning/20 text-xs text-warning mb-4">
             <span>⚠</span>

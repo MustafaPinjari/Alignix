@@ -22,6 +22,7 @@ export default function Review() {
     profiles, setProfiles, activeProfileId, setActiveProfileId,
     notify, setLoading, loading,
     reviewStep, setReviewStep,
+    setPageMap, pageScope, setPageScope,
   } = useAppStore();
 
   const [step, setStep] = useState("idle"); // idle|analyze|clarify|scope|preview|done
@@ -48,6 +49,7 @@ export default function Review() {
       }
       clearClarifications();
       setSandboxPreview(null);
+      setPageMap(null); // reset page map for new document
       // If clarifications needed, go to clarify step; else go to scope
       const hasClarifications = understandRes.data.clarifications?.length > 0;
       setStep(hasClarifications ? "clarify" : "scope");

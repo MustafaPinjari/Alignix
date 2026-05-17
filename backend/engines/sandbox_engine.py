@@ -1,6 +1,6 @@
 """
-Sandbox Engine — safe correction environment.
-Clones document → applies changes → validates → returns preview diff.
+Sandbox Engine — safe correction environment with page-scoped filtering.
+Clones document → applies page+element scoped corrections → returns diff.
 Never touches the original until user approves.
 """
 import shutil
@@ -9,6 +9,7 @@ import time
 from docx import Document
 from engines.rule_engine import RuleEngine
 from engines.layout_stabilizer import LayoutStabilizer
+from engines.page_map_engine import PageMapEngine, parse_page_range
 from services.profile_service import ProfileService
 
 
@@ -18,8 +19,13 @@ class SandboxEngine:
                        scope: dict | None = None,
                        clarification_answers: dict | None = None) -> dict:
         """
-        Clone document, apply scoped corrections, return diff summary.
-        Does NOT modify the original file.
+        Clone document, apply page+element scoped corrections, return diff.
+        scope = {
+            elements: ["heading1", "body", ...],   # element type filter
+            include_pages: "1-5,8",                # only these pages
+            exclude_pages: "1,2,20",               # never touch these
+            protected_pages: [1, 2],               # locked pages
+        }
         """
         sandbox_path = path + ".alignix_sandbox"
         try:
@@ -28,32 +34,47 @@ class SandboxEngine:
             if not rules:
                 return {"error": "No rules for profile"}
 
-            # Apply clarification overrides to rules
             if clarification_answers:
                 rules = self._apply_answers(rules, clarification_answers)
 
-            # Apply scope filter
             scoped_rules = self._scope_rules(rules, scope)
 
+            # Build page map for page-aware filtering
+            page_map_data = PageMapEngine().build_page_map(path)
+            para_page_map = page_map_data["para_page_map"]   # {para_index: page_num}
+            total_pages   = page_map_data["total_pages"]
+            excluded_pages = self._resolve_excluded_pages(scope, total_pages)
+
             doc = Document(sandbox_path)
-            doc, log = RuleEngine().apply_rules(doc, scoped_rules)
+            doc, log = RuleEngine().apply_rules(
+                doc, scoped_rules,
+                para_page_map=para_page_map,
+                excluded_pages=excluded_pages,
+            )
             layout_actions = LayoutStabilizer().stabilize(doc)
             doc.save(sandbox_path)
 
-            diff = self._build_diff(path, sandbox_path, log)
+            diff = self._build_diff(log)
+            affected_pages = sorted({
+                para_page_map.get(str(e.get("index", -1)), para_page_map.get(e.get("index", -1)))
+                for e in log if e.get("index") is not None
+            } - {None})
+
             return {
-                "sandbox_path": sandbox_path,
-                "changes": len(log),
+                "sandbox_path":   sandbox_path,
+                "changes":        len(log),
                 "layout_actions": len(layout_actions),
-                "diff": diff,
-                "safe_to_apply": self._is_safe(diff),
+                "diff":           diff,
+                "safe_to_apply":  True,
+                "affected_pages": affected_pages,
+                "excluded_pages": sorted(excluded_pages),
+                "total_pages":    total_pages,
             }
         except Exception as e:
             self._cleanup(sandbox_path)
             return {"error": str(e)}
 
     def commit(self, path: str) -> dict:
-        """Replace original with sandbox after user approval."""
         sandbox_path = path + ".alignix_sandbox"
         if not os.path.exists(sandbox_path):
             return {"error": "No sandbox found — run preview first"}
@@ -68,17 +89,31 @@ class SandboxEngine:
 
     # ── Internal ──────────────────────────────────────────────────────────────
 
+    def _resolve_excluded_pages(self, scope: dict | None, total_pages: int) -> set:
+        if not scope:
+            return set()
+        excluded = set()
+
+        # Explicit exclude_pages string e.g. "1,2,20-22"
+        exclude_str = scope.get("exclude_pages", "")
+        if exclude_str:
+            excluded |= parse_page_range(exclude_str, total_pages)
+
+        # Protected pages list
+        protected = scope.get("protected_pages", [])
+        excluded |= set(protected)
+
+        # include_pages = only these pages → everything else is excluded
+        include_str = scope.get("include_pages", "")
+        if include_str:
+            included = parse_page_range(include_str, total_pages)
+            all_pages = set(range(1, total_pages + 1))
+            excluded |= (all_pages - included)
+
+        return excluded
+
     def _apply_answers(self, rules: list, answers: dict) -> list:
-        """Merge user clarification answers into rule overrides."""
-        overrides = {}
-        for q_id, answer in answers.items():
-            if answer == "keep":
-                continue
-            # q_id format: "q_role_{index}" or "q_font_{index}"
-            parts = q_id.split("_")
-            if len(parts) >= 3 and parts[1] == "font" and answer == "normalize":
-                overrides["font_normalize"] = True
-        return rules  # rules unchanged; normalization handled by rule engine
+        return rules  # clarification answers handled by rule engine
 
     def _scope_rules(self, rules: list, scope: dict | None) -> list:
         if not scope:
@@ -88,20 +123,16 @@ class SandboxEngine:
             return rules
         return [r for r in rules if r["element"] in allowed]
 
-    def _build_diff(self, original_path: str, sandbox_path: str, log: list) -> list:
-        """Build a human-readable diff summary from the correction log."""
-        diff = []
-        for entry in log:
-            diff.append({
+    def _build_diff(self, log: list) -> list:
+        return [
+            {
+                "index":   entry.get("index"),
                 "element": entry.get("element"),
                 "text":    entry.get("text", "")[:60],
                 "changes": entry.get("changes", []),
-            })
-        return diff
-
-    def _is_safe(self, diff: list) -> bool:
-        """Heuristic: safe if fewer than 30% of elements changed."""
-        return True  # always show preview; let user decide
+            }
+            for entry in log
+        ]
 
     def _safe_replace(self, src: str, dst: str, retries: int = 5, delay: float = 0.8):
         for attempt in range(retries):

@@ -2,8 +2,8 @@ import axios from "axios";
 
 const api = axios.create({ baseURL: "http://127.0.0.1:5000/api" });
 
-// Document Understanding
-export const understandDocument = (path) => api.post("/document/understand", { path });
+export const getPageMap = (path) => api.post("/document/pagemap", { path });
+ = (path) => api.post("/document/understand", { path });
 
 // Sandbox / Safe Preview
 export const sandboxPreview = (path, profile_id, scope, answers) =>

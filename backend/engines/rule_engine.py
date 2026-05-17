@@ -19,19 +19,29 @@ ALIGN_ENUM = {
 
 class RuleEngine:
 
-    def apply_rules(self, doc: Document, rules: list) -> tuple[Document, list]:
+    def apply_rules(self, doc: Document, rules: list,
+                      para_page_map: dict = None,
+                      excluded_pages: set = None) -> tuple:
         """Apply all rules to document. Returns (modified_doc, change_log)."""
         rule_map = {r["element"]: r for r in rules}
+        excluded_pages = excluded_pages or set()
         log = []
 
-        for para in doc.paragraphs:
+        for i, para in enumerate(doc.paragraphs):
+            # Skip if paragraph is on an excluded/protected page
+            if para_page_map and excluded_pages:
+                page = para_page_map.get(i) or para_page_map.get(str(i))
+                if page in excluded_pages:
+                    continue
+
             element_type = self._classify(para)
             rule = rule_map.get(element_type)
             if not rule:
                 continue
             changes = self._apply_paragraph_rule(para, rule)
             if changes:
-                log.append({"element": element_type, "text": para.text[:60], "changes": changes})
+                log.append({"index": i, "element": element_type,
+                             "text": para.text[:60], "changes": changes})
 
         if "table" in rule_map:
             for table in doc.tables:

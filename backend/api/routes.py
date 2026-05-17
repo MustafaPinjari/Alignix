@@ -3,8 +3,9 @@ from engines.analyzer import DocumentAnalyzer
 from engines.correction import CorrectionEngine
 from engines.export import ExportEngine
 from engines.structure_analyzer import StructureAnalyzer
+from engines.page_map_engine import PageMapEngine
 from engines.understanding_engine import DocumentUnderstandingEngine
-from engines.sandbox_engine import SandboxEngine
+
 from engines.batch_engine import BatchEngine
 from engines.word_com import get_open_documents, attach_word_monitor, detach_word_monitor
 from services.profile_service import ProfileService
@@ -52,7 +53,18 @@ def health():
     score = DocumentAnalyzer().health_score(path)
     return jsonify(score)
 
-@bp.route("/document/understand", methods=["POST"])
+from engines.sandbox_engine import SandboxEngine
+
+@bp.route("/document/pagemap", methods=["POST"])
+def pagemap():
+    data = request.json
+    path = data.get("path")
+    if not path:
+        return jsonify({"error": "path required"}), 400
+    result = PageMapEngine().build_page_map(path)
+    return jsonify(result)
+
+
 def understand():
     data = request.json
     path = data.get("path")

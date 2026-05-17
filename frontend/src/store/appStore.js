@@ -1,6 +1,21 @@
 import { create } from "zustand";
 
 export const useAppStore = create((set, get) => ({
+  // Page map
+  pageMap: null,
+  setPageMap: (m) => set({ pageMap: m }),
+
+  // Page scope settings
+  pageScope: {
+    include_pages: "",
+    exclude_pages: "",
+    protected_pages: [],
+    elements: [],
+  },
+  setPageScope: (s) => set({ pageScope: s }),
+  updatePageScope: (key, val) =>
+    set((s) => ({ pageScope: { ...s.pageScope, [key]: val } })),
+
   // Document understanding
   understanding: null,
   setUnderstanding: (u) => set({ understanding: u }),
